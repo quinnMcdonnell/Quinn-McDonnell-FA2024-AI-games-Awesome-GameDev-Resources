@@ -3,6 +3,7 @@
 #include <vector>
 #include <utility>
 #include <cmath>
+#include <string>
 
 using namespace std;
 
@@ -101,7 +102,10 @@ struct Cohesion {
   Cohesion() = default;
 
   Vector2 ComputeForce(const vector<Boid>& boids, int boidAgentIndex) {
-    return {};
+      
+      
+      
+      return {};
   }
 };
 
@@ -118,13 +122,39 @@ struct Alignment {
 
 struct Separation {
   double radius;
-  double k;
+  double k; //multiplication
   double maxForce;
 
   Separation() = default;
 
   Vector2 ComputeForce(const vector<Boid>& boids, int boidAgentIndex) {
-    return {};
+    
+      Vector2 acc = {0, 0};
+      
+      for (auto n : boids)
+      {
+        if (n.position.x == boids[boidAgentIndex].position.x
+            && n.position.y == boids[boidAgentIndex].position.y) 
+            continue;
+
+        Vector2 dir = {n.position.x - boids[boidAgentIndex].position.x,
+                       n.position.y - boids[boidAgentIndex].position.y};  // Directional vector
+        
+        float dist = sqrt(dir.x * dir.x + dir.y * dir.y); //doing the distance calculation
+       
+        if (radius >= dist) 
+            continue;
+        
+        Vector2 hat = {dir.x / dist, dir.y / dist};
+        float strength = 1 / dist;
+
+        acc.x += hat.x * strength;
+        acc.y += hat.y * strength;
+
+        acc *= k;
+      }
+      
+      return acc;
   }
 };
 
