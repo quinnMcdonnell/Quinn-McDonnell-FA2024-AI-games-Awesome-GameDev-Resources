@@ -103,7 +103,20 @@ struct Cohesion {
 
   Vector2 ComputeForce(const vector<Boid>& boids, int boidAgentIndex) {
       
-      
+       Vector2 acc = {0, 0};
+    Vector2 PCM = {0, 0};
+
+    for (auto n : boids) {
+     
+     PCM += boids[boidAgentIndex].position;
+    }
+    
+    PCM /= boidAgentIndex; //Maybe?
+
+    for (auto n : boids)
+    {
+      acc.Distance(PCM, boids[boidAgentIndex].position)/radius;
+    }
       
       return {};
   }
@@ -137,10 +150,9 @@ struct Separation {
             && n.position.y == boids[boidAgentIndex].position.y) 
             continue;
 
-        Vector2 dir = {n.position.x - boids[boidAgentIndex].position.x,
-                       n.position.y - boids[boidAgentIndex].position.y};  // Directional vector
+        Vector2 dir = (n.position - boids[boidAgentIndex].position);
         
-        float dist = sqrt(dir.x * dir.x + dir.y * dir.y); //doing the distance calculation
+        double dist = dir.Distance(dir); //doing the distance calculation
        
         if (radius >= dist) 
             continue;
