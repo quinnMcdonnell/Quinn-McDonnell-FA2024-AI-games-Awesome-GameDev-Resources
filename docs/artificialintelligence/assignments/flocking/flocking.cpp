@@ -103,22 +103,25 @@ struct Cohesion {
 
   Vector2 ComputeForce(const vector<Boid>& boids, int boidAgentIndex) {
       
-       Vector2 acc = {0, 0};
-    Vector2 PCM = {0, 0};
+    Vector2 cForce;
+    Vector2 PCM;
 
-    for (auto n : boids) {
+    for (int i = 0; i < boids.size(); i++) {
      
-     PCM += boids[boidAgentIndex].position;
+     if (i != boidAgentIndex)
+        PCM += boids[i].position;
     }
     
-    PCM /= boidAgentIndex; //Maybe?
-
-    for (auto n : boids)
+    PCM /= boids.size() - 1;
+    cForce = PCM.normalized() * PCM.Distance(boids[boidAgentIndex].position, PCM);
+    cForce /= radius;
+    
+    if (cForce.sqrMagnitude() <= radius && cForce.sqrMagnitude() > 0)
     {
-      acc.Distance(PCM, boids[boidAgentIndex].position)/radius;
+      return cForce;
     }
-      
-      return {};
+
+    return Vector2();
   }
 };
 
@@ -129,7 +132,24 @@ struct Alignment {
   Alignment() = default;
 
   Vector2 ComputeForce(const vector<Boid>& boids, int boidAgentIndex) {
-    return {};
+    
+      Vector2 avgVelocity;
+      Vector2 aForce;
+
+      for (int i = 0; i < boids.size(); i++)
+      {
+        float pos = boids[i].position.Distance(boids[boidAgentIndex].position);
+          if (i != boidAgentIndex
+            && pos <= radius)
+          avgVelocity += boids[i].velocity;
+      }
+
+      avgVelocity /= boids.size() - 1;
+
+      aForce = {avgVelocity.x + boids[boidAgentIndex].velocity.x,
+                avgVelocity.y + boids[boidAgentIndex].velocity.y};
+
+      return aForce.normalized();
   }
 };
 
@@ -142,31 +162,14 @@ struct Separation {
 
   Vector2 ComputeForce(const vector<Boid>& boids, int boidAgentIndex) {
     
-      Vector2 acc = {0, 0};
+      Vector2 sForce;
       
-      for (auto n : boids)
+      for (int i = 0; i < boids.size(); i++)
       {
-        if (n.position.x == boids[boidAgentIndex].position.x
-            && n.position.y == boids[boidAgentIndex].position.y) 
-            continue;
-
-        Vector2 dir = (n.position - boids[boidAgentIndex].position);
         
-        double dist = dir.Distance(dir); //doing the distance calculation
-       
-        if (radius >= dist) 
-            continue;
-        
-        Vector2 hat = {dir.x / dist, dir.y / dist};
-        float strength = 1 / dist;
-
-        acc.x += hat.x * strength;
-        acc.y += hat.y * strength;
-
-        acc *= k;
       }
       
-      return acc;
+      return sForce;
   }
 };
 
@@ -205,15 +208,15 @@ int main() {
         // Process Cohesion Forces
         auto dist = (currentState[i].position-currentState[j].position).getMagnitude();
         if (i != j && dist <= cohesion.radius) {
-          allForces[i] += cohesion.ComputeForce(currentState, i);
+          allForces[i] += cohesion.ComputeForce(currentState, i) * cohesion.k;
         }
         // Process Separation Forces
         if (i != j && dist <= separation.radius) {
-          allForces[i] += separation.ComputeForce(currentState, i);
+          allForces[i] += separation.ComputeForce(currentState, i) * separation.k;
         }
         // Process Alignment Forces
         if (i != j && dist <= alignment.radius) {
-          allForces[i] += alignment.ComputeForce(currentState, i);
+          allForces[i] += alignment.ComputeForce(currentState, i) * alignment.k;
         }
       }
     }
@@ -223,7 +226,7 @@ int main() {
     for (int i = 0; i < numberOfBoids; i++) // for every boid
     {
       newState[i].velocity += allForces[i] * deltaT;
-      newState[i].position += currentState[i].velocity * deltaT;
+      newState[i].position += newState[i].velocity * deltaT;
       cout << newState[i].position.x << " " << newState[i].position.y << " "
            << newState[i].velocity.x << " " << newState[i].velocity.y << endl;
     }
