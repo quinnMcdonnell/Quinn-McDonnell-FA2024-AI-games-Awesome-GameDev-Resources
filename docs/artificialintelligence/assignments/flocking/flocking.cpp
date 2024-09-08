@@ -162,13 +162,28 @@ struct Separation {
 
   Vector2 ComputeForce(const vector<Boid>& boids, int boidAgentIndex) {
     
-      Vector2 sForce;
+      Vector2 sForce = {0, 0};
+      Vector2 norm;
+      float length;
       
       for (int i = 0; i < boids.size(); i++)
       {
-        
+        if (i != boidAgentIndex) {
+          norm = Vector2().normalized(boids[i].position - boids[boidAgentIndex].position);
+          length = Vector2().getMagnitude(boids[i].position - boids[boidAgentIndex].position);
+
+          if (length > 0.0 && length <= radius) {
+            Vector2 tempForce = norm / length;
+
+            if (tempForce.x > maxForce && tempForce.y > maxForce) {
+              tempForce = tempForce.normalized() * maxForce;
+            }
+
+            sForce += tempForce;
+          }
+        }
       }
-      
+
       return sForce;
   }
 };
@@ -208,15 +223,15 @@ int main() {
         // Process Cohesion Forces
         auto dist = (currentState[i].position-currentState[j].position).getMagnitude();
         if (i != j && dist <= cohesion.radius) {
-          allForces[i] += cohesion.ComputeForce(currentState, i) * cohesion.k;
+          allForces[i] += cohesion.ComputeForce(currentState, i);
         }
         // Process Separation Forces
         if (i != j && dist <= separation.radius) {
-          allForces[i] += separation.ComputeForce(currentState, i) * separation.k;
+          allForces[i] += separation.ComputeForce(currentState, i);
         }
         // Process Alignment Forces
         if (i != j && dist <= alignment.radius) {
-          allForces[i] += alignment.ComputeForce(currentState, i) * alignment.k;
+          allForces[i] += alignment.ComputeForce(currentState, i);
         }
       }
     }
