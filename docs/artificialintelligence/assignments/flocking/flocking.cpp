@@ -118,7 +118,7 @@ struct Cohesion {
     
     if (cForce.sqrMagnitude() <= radius && cForce.sqrMagnitude() > 0)
     {
-      return cForce;
+      return cForce * k;
     }
 
     return Vector2();
@@ -169,8 +169,8 @@ struct Separation {
       for (int i = 0; i < boids.size(); i++)
       {
         if (i != boidAgentIndex) {
-          norm = Vector2().normalized(boids[i].position - boids[boidAgentIndex].position);
-          length = Vector2().getMagnitude(boids[i].position - boids[boidAgentIndex].position);
+          norm =   (boids[boidAgentIndex].position - boids[i].position).normalized();
+          length = (boids[boidAgentIndex].position - boids[i].position).getMagnitude();
 
           if (length > 0.0 && length <= radius) {
             Vector2 tempForce = norm / length;
@@ -184,7 +184,7 @@ struct Separation {
         }
       }
 
-      return sForce;
+      return sForce * k;
   }
 };
 
