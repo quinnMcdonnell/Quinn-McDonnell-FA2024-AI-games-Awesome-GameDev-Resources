@@ -168,20 +168,20 @@ void Step(point l)
 }
 
 int main() {  
-  int x, y, numSteps;
-  cin >> x >> y >> numSteps;
+  int c, l, numSteps;
+  cin >> c >> l >> numSteps;
  
-  board = generateBoard({x, y});
+  board = generateBoard({c, l});
 
-  readBoard({x, y});
+  readBoard({c, l});
   cout << "result after " << numSteps << " steps" << endl << endl;
 
   for (int i = 0; i < numSteps; i++)
   {
-    Step({x, y});
+    Step({c, l});
 
   }
 
-  printBoard({x, y});
+  printBoard({c, l});
 
 }
