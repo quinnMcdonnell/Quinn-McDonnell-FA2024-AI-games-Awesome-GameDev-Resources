@@ -110,9 +110,6 @@ int getNeighbors(point p, point lim)
     {
       count++;
     }
-    if (board[t.y][t.x]) {
-      count++;
-    }
     if (board[b.y][b.x]) {
       count++;
     }
